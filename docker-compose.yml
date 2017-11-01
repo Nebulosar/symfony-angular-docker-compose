@@ -1,0 +1,64 @@
+version: '3'
+
+services:
+    nginx:
+        image: nginx:1.13
+        ports:
+            - "80:80"
+        volumes:
+            - ./nginx/symfony_app.conf:/etc/nginx/conf.d/symfony_app.conf
+            - ${SYMFONY_APP}:/var/www/symfony-app
+        links:
+            - php_fpm
+        networks:
+            default:
+                aliases:
+                    - symfony-app.dev
+
+    php_fpm:
+        build: ./php7.1
+        ports:
+            - "9000:9000"
+        links:
+            - mysql
+        volumes:
+            - ${SYMFONY_APP}:/var/www/symfony-app
+            - ./php7.1/php-ini-overrides.ini:/usr/local/etc/php/conf.d/99-overrides.ini
+
+    node:
+        build: ./node
+        ports:
+            - 4200:4200
+        volumes:
+            - ${ANGULAR_APP}:/home/node/app/frontend
+        tty: true
+        command: cd /home/node/app/frontend && npm start
+
+    mysql:
+        image: mysql:5.7
+        volumes:
+            - "mysql-data:/var/lib/mysql"
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+        ports:
+            - 3306:3306
+
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        environment:
+            - PMA_ARBITRARY=1
+            - PMA_HOST=mysql
+        restart: always
+        ports:
+            - 3000:80
+        volumes:
+            - /sessions
+        links:
+            - mysql
+
+volumes:
+    mysql-data:
+        external: true
