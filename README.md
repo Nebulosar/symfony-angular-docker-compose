@@ -1,5 +1,5 @@
 # symfony-angular-docker-compose
-Docker compose for symfony + angular project
+Docker compose for symfony + mysql + angular project
 
 Setup
 -----
@@ -33,6 +33,10 @@ $ docker volume create --name=mysql-data
 ```bash
 $ docker-compose config
 ```
+7) Add `symfony-app.dev` to `/etc/hosts` 
+```
+127.0.0.1   symfony-app.dev
+```
 Usage
 -----
 Run development environment
@@ -60,6 +64,16 @@ $ docker exec -it {container_name} bash
 Fix minor problem with docker images
 ```bash
 $ docker-compose up --force-recreate
+```
+
+Hacks
+-----
+For correct work with angular app you must fix `package.json`
+```
+"scripts": {
+    "ng": "ng",
+    "start": "ng serve --host 0.0.0.0",
+    ....
 ```
 
 Access to projects
